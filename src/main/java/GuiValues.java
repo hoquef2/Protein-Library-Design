@@ -1,5 +1,7 @@
 public interface GuiValues {
+
     
+
     int getMinTemp();
     int getMaxTemp();
     int getMinLen();

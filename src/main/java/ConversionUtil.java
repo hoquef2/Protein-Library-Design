@@ -217,6 +217,15 @@ public class ConversionUtil {
         return adjustedAllocationList;
     }
 
+    /*takes in a protein String as input and outputs the corresponding
+     com.tcnj.oligonukes.DNA sequence, in binary representation, that minimizes or maximizes 
+     (depending on the mode) CG content. C/G's are represented as a 1 and A/T's
+     are represented as a 0. Mode is either "Min" or `Max`. Min and Max are
+     a bit of a misnomer. They refer to minimizing or maximizing length for
+     a given melting temperature. So an oligo that melts  at a temperature X 
+     from the Min output will be as short as possible while an oligo from the 
+     output Max will be be as long as possible
+     */
     public static String proteinSequenceToBinary(String proteinSequence, HashMap<Integer, String> degenerateCodons, String Mode) {
 
         //the length of the protein sequence

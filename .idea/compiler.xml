@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="oNukes" />
+        <module name="Protein-Library-Design" />
       </profile>
     </annotationProcessing>
   </component>

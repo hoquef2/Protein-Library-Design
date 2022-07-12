@@ -71,7 +71,7 @@ public class ConversionUtilTest {
     void convertProteinSequenceToBinaryTemperatureDna() {
         //Given.
         String proteinSequence = "ACDEFGHIKLMNPQRSTVWY";
-        HashMap<Integer, String> degenerateCodons= new HashMap<Integer, String>;
+        HashMap<Integer, String> degenerateCodons= new HashMap<Integer, String>();
         String modeMax = "Max";
         String modeMin = "Min";
         
