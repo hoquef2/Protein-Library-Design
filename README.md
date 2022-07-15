@@ -5,7 +5,8 @@ The Oligo Wizard is a tool which takes in a FASTA sequence through a text file o
 To successfully install and utilize this tool a user must have the following:
 1. Install an IDE, preferably NetBeans, or Visual Studio Code.
 2. Install JDK 12 or 18 (both works).
-3. 
+3. After completing installation, download the following zip file: 
+4. Open in an IDE and run.
 
 ## 
 
