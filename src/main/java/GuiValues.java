@@ -6,8 +6,8 @@ public interface GuiValues {
     int getMaxTemp();
     int getMinLen();
     int getMaxLen();
-    int getCostPerBase();
-    int getCostPerDegenerateBase();
+    Float getCostPerBase();
+    Float getCostPerDegenerateBase();
     String getFastaFilePath();
     String getAlternateAminoFilePath();
     String getOrganism();

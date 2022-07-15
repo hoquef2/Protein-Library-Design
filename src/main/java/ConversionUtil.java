@@ -4,19 +4,19 @@ import java.util.HashMap;
 
 public class ConversionUtil {
     public static String dnaToProteinSequence(String[] dnaSequence) {
-        
+
         //if the dnaSequence is empty
         if(dnaSequence[0] == ""){
             return "";
         }
-        
+
         StringBuffer convertedProtein = new StringBuffer(dnaSequence.length);
         for(int codonIndex = 0; codonIndex < dnaSequence.length; codonIndex++) {
             String currCodon = dnaSequence[codonIndex];
             String proteinChar = String.valueOf(AminoData.aminoByCodon.get(currCodon).getOneLetterAbbreviation());
             convertedProtein.append(proteinChar);
         }
-        
+
         return convertedProtein.toString();
     }
     public static String[] proteinSequenceToDna(String proteinSequence, HashMap<String, Integer> codonFrequencies) {
@@ -25,14 +25,14 @@ public class ConversionUtil {
         if(proteinSequence.length() == 0) {
             return new String[] {""};
         }
-        
+
         String[] DNAsequence = new String[proteinSequence.length()];
         //converting protein sequence into com.tcnj.oligonukes.DNA sequence
         //for each amino acid
 
         for (int currAminoIndex = 0; currAminoIndex < AminoData.aminoList.length(); currAminoIndex++) {
             //number of aminoAcid occurrences
-            Integer numAminos = 0;    
+            Integer numAminos = 0;
             //location of each com.tcnj.oligonukes.Amino Acid occurrence
             ArrayList<Integer> aminoLocations = new ArrayList<Integer>();
             //computing aminoAmount and aminoLocations
@@ -59,7 +59,7 @@ public class ConversionUtil {
                         codonFrequencies.get(currCodon);
             }
             Integer[] allocationList = apportionment(codonAmounts, numAminos);
-            
+
 
             //for every codon
             for (int codonElement = 0; codonElement < codons.length; codonElement++) {
@@ -77,7 +77,7 @@ public class ConversionUtil {
         }
         return DNAsequence;
     }
-    
+
     //proteinSequenceToDna helper function: generates a random permutation from 1 through N
     private static Integer[] randomPermutation(int size) {
         Integer[] array = new Integer[size];
@@ -99,21 +99,21 @@ public class ConversionUtil {
 
     //proteinSequenceToDna helper function: uses the Huntington - Hill method of apportionment to most fairly distribute amino acids among codons
     private static Integer[] apportionment(Integer[] codonAmounts, Integer numberOfAminos) {
-        
+
         //if there are no occurrences of a particular amino acid
         if(numberOfAminos == 0) {
             Integer[] apportionmentValues = new Integer[codonAmounts.length];
             Arrays.fill(apportionmentValues, 0);
             return apportionmentValues;
         }
-        
+
         //if the number of codons is more than the number of aminos to be allocated, the huntington hill
         //method breaks down, and an alternate method is needed.
         //In this case, aminos will be handed out to the codon with the highest frequency, until there are 
         //no more codons left
         if (numberOfAminos < codonAmounts.length) {
             Integer[] apportionmentValues = new Integer[codonAmounts.length];
-            
+
             //initializing all values to 0
             for(int i = 0; i < apportionmentValues.length; i++) {
                 apportionmentValues[i] = 0;
@@ -133,7 +133,7 @@ public class ConversionUtil {
             }
             return apportionmentValues;
         }
-        
+
         for(int codonIndex = 0; codonIndex < codonAmounts.length; codonIndex++) {
             System.out.println(codonAmounts[codonIndex]);
         }
@@ -157,10 +157,10 @@ public class ConversionUtil {
         Double divisorAvg;
 
         while (numberOfAminos != allocation) {
-            
+
             //resetting allocation value
             allocation = 0;
-            
+
             divisorAvg = (divisorHigh + divisorLow) / 2;
             for (int i = 0; i < numberOfCodons; i++) {
                 //computing the quota for codon
@@ -169,12 +169,12 @@ public class ConversionUtil {
 
                 //computing the lower quota for codon
                 lowerQuota[i] = (int) Math.floor(quota[i]);
-                
-                
+
+
                 //computing the geometric mean of the lower quota and one value higher for codon
                 geoMeanLowerQuota[i] = (float) Math.sqrt(lowerQuota[i] * (lowerQuota[i] + 1));
-                
-                
+
+
                 //computing the allocation
                 if (quota[i] < geoMeanLowerQuota[i]) {
                     allocationList[i] = (int) Math.floor(quota[i]);
@@ -183,7 +183,7 @@ public class ConversionUtil {
                 }
                 allocation += allocationList[i];
             }
-            
+
             //If the allocation is to small or to large, recompute the divisor anr recalculate allocationList
             if (allocation < numberOfAminos) {
                 System.out.println("number of aminos assigned, " + allocation + ", is too low");
@@ -217,15 +217,6 @@ public class ConversionUtil {
         return adjustedAllocationList;
     }
 
-    /*takes in a protein String as input and outputs the corresponding
-     com.tcnj.oligonukes.DNA sequence, in binary representation, that minimizes or maximizes 
-     (depending on the mode) CG content. C/G's are represented as a 1 and A/T's
-     are represented as a 0. Mode is either "Min" or `Max`. Min and Max are
-     a bit of a misnomer. They refer to minimizing or maximizing length for
-     a given melting temperature. So an oligo that melts  at a temperature X 
-     from the Min output will be as short as possible while an oligo from the 
-     output Max will be be as long as possible
-     */
     public static String proteinSequenceToBinary(String proteinSequence, HashMap<Integer, String> degenerateCodons, String Mode) {
 
         //the length of the protein sequence

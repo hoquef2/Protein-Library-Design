@@ -33,39 +33,30 @@ public class SystemUtil {
         return new String[] {title, content};
     }
     
-    public static HashMap<Integer, String> loadAlternateAminos(String path) {
-        HashMap<Integer, String> locationAaPairs = new HashMap<>();
-        
-        try (FileReader alternateAminosFileReader = new FileReader(path)) {
-            
-            StringBuffer rawData = new StringBuffer();
+    public static ArrayList<Amino> loadAlternateAminos(String path) {
+        ArrayList<Amino> aminoList = new ArrayList<Amino>();
 
-            //TODO remove redundant FileReader
-            int i;
-            while ((i = alternateAminosFileReader.read()) != -1) {
+        Integer location = null;
+        String data = null;
 
-                char currentChar = (char) i;
-                rawData.append(currentChar);
-            }
-            String rawDataString = rawData.toString();
-            Scanner dataScanner = new Scanner(rawDataString);
-            ArrayList<String> data = new ArrayList<String>();
-            while (dataScanner.hasNext()) {
-                data.add(dataScanner.next());
-            }
+        File alternateAminoFile = new File(path);
+        try (Scanner fileScanner = new Scanner(alternateAminoFile)) {
 
-            //parsing data to pull out position and value information
-            //data stores both position and value information, so one must divide by two in order to parse
-            for (i = 0; i < data.size() / 2; i++) {
-                Integer position = Integer.parseInt(data.get(i * 2));
-                String value = data.get((i * 2) + 1);
-                locationAaPairs.put(position, value);
+            while(fileScanner.hasNextLine()) {
+                
+                location = Integer.parseInt(fileScanner.next());
+                System.out.println(location);
+                data = fileScanner.next();
+                System.out.println(data);
+                Amino thisAmino = new Amino(location, data);
+                aminoList.add(thisAmino);
+
             }
-        } catch (IOException e) {
-            String errorMessage = "File did not load correctly.";
-            System.err.println(errorMessage);
         }
-        return locationAaPairs;
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return aminoList;
     }
 
     public static HashMap<String, Integer> loadCodonFrequencies(String path) {

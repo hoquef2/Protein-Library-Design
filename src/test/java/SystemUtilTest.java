@@ -2,6 +2,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,13 +70,17 @@ class SystemUtilTest {
 
         // When. 
         try {
-            HashMap<Integer, String> pairs = SystemUtil.loadAlternateAminos(path);
+            ArrayList<Amino> aminoList = SystemUtil.loadAlternateAminos(path);
 
             // Then.
-            assertEquals("ADF", pairs.get(674));
-            assertEquals("PLK", pairs.get(23));
-            assertEquals("CFP", pairs.get(2012));
-            assertEquals("ARNDCQEGHILKMFPSTWYV", pairs.get(0));
+            assertEquals(aminoList.get(0).getLocation(), 674);
+            assertEquals(aminoList.get(0).getData(), "ADF");
+            assertEquals(aminoList.get(1).getLocation(), 23);
+            assertEquals(aminoList.get(1).getData(), "PLK");
+            assertEquals(aminoList.get(2).getLocation(), 2012
+            );
+            assertEquals(aminoList.get(2).getData(), "CFP");
+
 
         } catch (Exception e) {
             fail("There should not be any exception.");
