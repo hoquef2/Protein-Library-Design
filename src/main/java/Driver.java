@@ -1,7 +1,6 @@
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 public class Driver {
     
@@ -30,17 +29,17 @@ public class Driver {
         
         HashMap<Integer, String> degenerateCodons = new HashMap<>();
         String minTempSequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, "Min");
-        Integer[][] minLengthCalculatorOutput = CuttingAlgorithmUtil.LengthCalculator(minTempSequence, minTemp, maxTemp, maxLen, "Min");
+        Integer[][] minLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(minTempSequence, minTemp, maxTemp, maxLen, "Min");
         //CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput, minTemp, maxTemp);
 
         String maxTempSequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, "Max");
-        Integer[][] maxLengthCalculatorOutput = CuttingAlgorithmUtil.LengthCalculator(maxTempSequence, minTemp, maxTemp, maxLen, "Max");
+        Integer[][] maxLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(maxTempSequence, minTemp, maxTemp, maxLen, "Max");
 
         //CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput, minTemp, maxTemp);
-        //System.out.println(minTempSequence);
+        System.out.println(minTempSequence);
 
         //CuttingAlgorithmUtil.printLengthCalculator(maxLengthCalculatorOutput, minTemp, maxTemp);
-        //System.out.println(maxTempSequence);
+        System.out.println(maxTempSequence + "");
 
         
         CuttingAlgorithmUtil.costCalculator(dnaSequence, altAminoList, minLengthCalculatorOutput, maxLengthCalculatorOutput, minLen, maxLen, minTemp, maxTemp, costOfCodon, costOfDegenerateCodon);

@@ -5,7 +5,7 @@ import java.util.Formatter;
 public class CuttingAlgorithmUtil {
 
     //calculates temperature given CGpercentage, length, and NAconcentration
-    //TODO determine if flooring and ceiling are associated with the correct mode
+    //TODO get rid of min and max modes, they do the same thing
     public static Integer tempCalculator(Float CGpercentage, Integer length, Float NaConcentration, String Mode) {
 
         int temp;
@@ -13,21 +13,21 @@ public class CuttingAlgorithmUtil {
         if(Mode.equals("Min")) {
             //temp equation for lengths less than 18
             if (length < 18) {
-                temp = (int) Math.ceil((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
+                temp = (int) Math.round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
             }
             //temp equation for lengths greater than or equal to 18
             else {
-                temp = (int) Math.ceil(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
+                temp = (int) Math.round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
             }
         }
         else if (Mode.equals("Max")) {
             //temp equation for lengths less than 18
             if (length < 18) {
-                temp = (int) Math.floor((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
+                temp = (int) Math.round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
             }
             //temp equation for lengths greater than or equal to 18
             else {
-                temp = (int) Math.floor(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
+                temp = (int) Math.round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
             }
         }
         else {
@@ -42,7 +42,7 @@ public class CuttingAlgorithmUtil {
          all desired melting temperatures and starting location.
          */
     //TODO make sure that min/max mode compatibility is correctly implemented
-    public static Integer[][] LengthCalculator(String TempSequence, Integer minTemp, Integer maxTemp, Integer maxLen, String Mode) {
+    public static Integer[][] overlapCalculator(String TempSequence, Integer minTemp, Integer maxTemp, Integer maxLen, String Mode) {
 
         //Mode must be either 'Min' or 'Max'
         if (!(Mode.equals("Min") || Mode.equals("Max"))) {
@@ -205,64 +205,92 @@ public class CuttingAlgorithmUtil {
         final Integer lenRange = maxLen - minLen;
         final Integer tempRange = maxTemp - minTemp;
         final Integer NUM_NUKES = DNAsequence.length * 3;
+        //keaps track of minimum cost for each position
         Float[][] costArray = new Float[NUM_NUKES][tempRange];
         
+
         for (Float[] tempIndex : costArray) {
             //all entries in costArray are initialized to positive infinity
             Arrays.fill(tempIndex, Float.POSITIVE_INFINITY);
             
         }
+        
+        
 
+        for (int tempIndex = 0; tempIndex < tempRange; tempIndex++) {
+            //the first element of each temperature row are re-initialized to 0
+            costArray[0][tempIndex] = 0F;
 
+            //the costs of all the lengths able to be reached by an oligo starting at 0 are calculated
+            for(int currLen = minLen; currLen < maxLen; currLen++) {
+                
+                Float cost = oligoCost(costOfBase,costOfDegenerateBase, altAminoList, 0, currLen);
+                costArray[currLen][tempIndex] = cost;
 
-
-        //for every temperature
-        for (Integer tempIndex = 0; tempIndex < tempRange; tempIndex++) {
-            
-            //computing cost associated with first oligonucleotide
-
-            //for every starting position
-            //dnaIndex= starting point of currentOligo
-            for(int dnaIndex = 0; dnaIndex < DNAsequence.length; dnaIndex++) {
-                if(dnaIndex == 0) {
-                    costArray[0][tempIndex] = 0F;
-                }  
-                //for every length
-                //lengthIndex = ending point of currentOligo
-                if(costArray[dnaIndex][tempIndex] != Float.POSITIVE_INFINITY) {
-                    for(int lengthIndex = 0; lengthIndex < maxLen - minLen; lengthIndex++) {
-
-                        //the ending position of the current oligo being examined
-                        Integer endingPos = dnaIndex + lengthIndex;
-                        //cost of oligo is the cost at the start of the oligo + the cost of the oligo
-                        Float currCost = oligoCost(costOfBase, costOfDegenerateBase, altAminoList, dnaIndex, endingPos) + costArray[dnaIndex][tempIndex];
-
-                        if(costArray[dnaIndex + lengthIndex][tempIndex] < currCost) {
-                            costArray[dnaIndex + lengthIndex][tempIndex] = currCost;
-                        }
-                        
-                        
-                        //for every overlap length that is possible, populate the starting point of the overlap, if it at a minimum.
-                        Integer minOverlapLen = minLenData[lengthIndex][tempIndex];
-                        Integer maxOverlapLen = maxLenData[lengthIndex][tempIndex];
-                        for(int currOverlap = minOverlapLen; currOverlap < maxOverlapLen; currOverlap++) {
-
-                            if(currCost < costArray[lengthIndex - currOverlap][tempIndex]) {
-                                costArray[endingPos - currOverlap][tempIndex] = currCost;
-                            }
-                        }
-                        
-                    }
-                }
-               
             }
             
-            
-            
-            Integer currTemp = minLen + tempIndex;
-            
-            //Initializing all positions with a cost of infinity
-            
+            //goes through each reachable indx (index that is not at +infinity) and calculates the next oligo cost
+            //if the current oligo ended at the given position
+            for(int currDnaIndex = 1; currDnaIndex < NUM_NUKES; currDnaIndex++) {
+                float prevOligoCost = costArray[currDnaIndex][tempIndex];
+                if(prevOligoCost != Float.POSITIVE_INFINITY) {
+                    Integer minOverlapSize = minLenData[currDnaIndex][tempIndex];
+                    Integer maxOverlapSize = maxLenData[currDnaIndex][tempIndex];
+                    
+                    
+                    //--------------------------->Oligo(A)
+                    //                <-----------Overlap(A.1)
+                    //                --------------------------------------->
+                    //                ---------------------------------------->
+                    //                ----------------------------------------->
+                    //                ...
+                    //                ------------------------------------------------------>
+                    //                ------------------------------------------------------->
+                    //                 <----------Overlap(A.2)
+                    //                 --------------------------------------->
+                    //                 ---------------------------------------->
+                    //                 ----------------------------------------->
+                    //                 ...
+                    //                 ------------------------------------------------------>
+                    //                 ------------------------------------------------------->
+                    //                  <---------Overlap(A.3)  
+                    //                  --------------------------------------->
+                    //                  ---------------------------------------->
+                    //                  ----------------------------------------->
+                    //                  ...
+                    //                  ------------------------------------------------------>
+                    //                  ------------------------------------------------------->
+                    //                                .
+                    //                                .
+                    //                                .
+                    //                         <--Overlap(A.7)
+                    //                         --------------------------------------->
+                    //                         ---------------------------------------->
+                    //                         ----------------------------------------->
+                    //                         ...
+                    //                         ------------------------------------------------------>
+                    //                         ------------------------------------------------------->
+                    
+                    //goes through every possible overlap.
+                    for(int currOverlap = minOverlapSize; currOverlap < maxOverlapSize; currOverlap++) {
+                        //goes through every possible length at given overlap, calculating cost
+                        for(int currLen = minLen; currLen < maxLen; currLen++) {
+                            Integer startIndex = currDnaIndex - currOverlap;
+                            Integer endIndex = currDnaIndex - currOverlap + currLen;
+                            
+                            //makes sure to keep al indexes in bounds
+                            if(endIndex < NUM_NUKES) {
+                                float currOligoCost = prevOligoCost + oligoCost(costOfBase,costOfDegenerateBase, altAminoList, startIndex, endIndex);
+
+                                if(currOligoCost < costArray[endIndex][tempIndex]) {
+                                    costArray[endIndex][tempIndex] = currOligoCost;
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            }
         }
         printCostArray(costArray, minTemp, maxTemp);
         return null;
