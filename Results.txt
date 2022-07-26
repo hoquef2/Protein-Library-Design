@@ -1,0 +1,10 @@
+Min Temperature: 50
+Max Temperature100
+Min Length: 20
+Max Length:70
+Cost per Base:0.17
+Cost per Degenerate Base:0.25
+Organism Name: Human
+Alternate Amino filePath: C:\Users\faiza\OneDrive\Documents\MUSE 2022\Homo_Sapsfasta.txt
+FastaFilePath: C:\Users\faiza\OneDrive\Documents\MUSE 2022\FASTAEx.txt
+Results on their way #STANDBY
