@@ -17,8 +17,8 @@ public class Driver {
         Float costOfDegenerateCodon = tempInput.getCostPerDegenerateBase();
         ArrayList<Amino> altAminoList = SystemUtil.loadAlternateAminos("data/test/TestAlternateAminosData");
 
-        HashMap<String, Integer> codonFrequencies = SystemUtil.loadCodonFrequencies("data/real/HumanCodonFrequenciesData");
-
+        HashMap<String, Integer> codonFrequencies = SystemUtil
+                .loadCodonFrequencies("data/real/HumanCodonFrequenciesData");
 
         String proteinSequence = null;
         try {
@@ -31,20 +31,25 @@ public class Driver {
 
         HashMap<Integer, String> degenerateCodons = new HashMap<>();
         String minTempSequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, "Min");
-        Integer[][] minLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(minTempSequence, minTemp, maxTemp, maxLen, "Min");
-        //CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput, minTemp, maxTemp);
+        Integer[][] minLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(minTempSequence, minTemp,
+                maxTemp, maxLen, "Min");
+        // CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput,
+        // minTemp, maxTemp);
 
         String maxTempSequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, "Max");
-        Integer[][] maxLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(maxTempSequence, minTemp, maxTemp, maxLen, "Max");
+        Integer[][] maxLengthCalculatorOutput = CuttingAlgorithmUtil.overlapCalculator(maxTempSequence, minTemp,
+                maxTemp, maxLen, "Max");
 
-        //CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput, minTemp, maxTemp);
-        //System.out.println(minTempSequence);
+        // CuttingAlgorithmUtil.printLengthCalculator(minLengthCalculatorOutput,
+        // minTemp, maxTemp);
+        // System.out.println(minTempSequence);
 
-        //CuttingAlgorithmUtil.printLengthCalculator(maxLengthCalculatorOutput, minTemp, maxTemp);
-        //System.out.println(maxTempSequence + "");
+        // CuttingAlgorithmUtil.printLengthCalculator(maxLengthCalculatorOutput,
+        // minTemp, maxTemp);
+        // System.out.println(maxTempSequence + "");
 
-
-        String output = CuttingAlgorithmUtil.costCalculator(dnaSequence, altAminoList, minLengthCalculatorOutput, maxLengthCalculatorOutput, minLen, maxLen, minTemp, maxTemp, costOfCodon, costOfDegenerateCodon);
+        String output = CuttingAlgorithmUtil.costCalculator(dnaSequence, altAminoList, minLengthCalculatorOutput,
+                maxLengthCalculatorOutput, minLen, maxLen, minTemp, maxTemp, costOfCodon, costOfDegenerateCodon);
         System.out.println(output);
     }
 }

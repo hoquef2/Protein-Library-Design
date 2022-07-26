@@ -1,3 +1,5 @@
+package main.java;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,17 +12,18 @@ public class SystemUtil {
     public static String[] loadFasta(String path) throws FileNotFoundException {
         String title = null;
         String content = null;
-        
+
         try (FileReader fastaFileReader = new FileReader(path)) {
             StringBuffer rawData = new StringBuffer();
-            
+
             int i;
             while ((i = fastaFileReader.read()) != -1) {
                 char currentChar = (char) i;
                 rawData.append(currentChar);
             }
             int startOfTitle = rawData.indexOf(">");
-            int firstLineBreak = Math.min(rawData.indexOf("\r\n"), Math.min(rawData.indexOf("\r"), rawData.indexOf("\n")));
+            int firstLineBreak = Math.min(rawData.indexOf("\r\n"),
+                    Math.min(rawData.indexOf("\r"), rawData.indexOf("\n")));
             title = rawData.substring(startOfTitle + 1, firstLineBreak);
 
             content = rawData.substring(firstLineBreak + 1);
@@ -30,9 +33,9 @@ public class SystemUtil {
             System.err.println(errorMessage);
             throw new FileNotFoundException(errorMessage);
         }
-        return new String[] {title, content};
+        return new String[] { title, content };
     }
-    
+
     public static ArrayList<Amino> loadAlternateAminos(String path) {
         ArrayList<Amino> aminoList = new ArrayList<Amino>();
 
@@ -42,8 +45,8 @@ public class SystemUtil {
         File alternateAminoFile = new File(path);
         try (Scanner fileScanner = new Scanner(alternateAminoFile)) {
 
-            while(fileScanner.hasNextLine()) {
-                
+            while (fileScanner.hasNextLine()) {
+
                 location = Integer.parseInt(fileScanner.next());
                 System.out.println(location);
                 data = fileScanner.next();
@@ -52,24 +55,23 @@ public class SystemUtil {
                 aminoList.add(thisAmino);
 
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return aminoList;
     }
 
     public static HashMap<String, Integer> loadCodonFrequencies(String path) {
-        
-        //86 is perfect size for this array, as there are 64 unique codons
-        //and Hashtables have a default resize factor of 1.33
+
+        // 86 is perfect size for this array, as there are 64 unique codons
+        // and Hashtables have a default resize factor of 1.33
         HashMap<String, Integer> codonFrequencies = new HashMap<>(86);
-        
-        //populating codonAmounts
+
+        // populating codonAmounts
         File codonFrequenciesFile = new File(path);
         try (Scanner fileScanner = new Scanner(codonFrequenciesFile)) {
 
-            while(fileScanner.hasNext()) {
+            while (fileScanner.hasNext()) {
                 fileScanner.next();
                 String codon = fileScanner.next();
                 String amount = fileScanner.next();
@@ -77,23 +79,21 @@ public class SystemUtil {
                 fileScanner.next();
                 codonFrequencies.put(codon, Math.round(Float.valueOf(amount)));
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return codonFrequencies;
     }
 
     public static HashMap<String, String[][]> loadDegenerateCodons(String path) {
-        
-        
-        HashMap <String, String[][]> degenerateCodons = new HashMap<String, String[][]>(1394605);
-        
+
+        HashMap<String, String[][]> degenerateCodons = new HashMap<String, String[][]>(1394605);
+
         File degenerateCodonFile = new File(path);
         try (Scanner fileScanner = new Scanner(degenerateCodonFile)) {
 
             int currentLine = 0;
-            while(fileScanner.hasNext()) {
+            while (fileScanner.hasNext()) {
 
                 Integer numCodons = Integer.valueOf(fileScanner.next());
                 String aminoList = fileScanner.next();
@@ -108,15 +108,11 @@ public class SystemUtil {
                 content[1][0] = correctnessFactor;
                 degenerateCodons.put(aminoList, content);
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return degenerateCodons;
     }
 }
-
-

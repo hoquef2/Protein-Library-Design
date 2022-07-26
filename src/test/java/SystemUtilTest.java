@@ -28,8 +28,8 @@ class SystemUtilTest {
                 "AEDAKPKDLSDSSWIETPSSIKSIDSSDSGIYEQAKRRRISPADTPVSESSSPLKSEVLA" +
                 "QRDCEKNCAKDISGYYGFYSHS";
         String path = "data/test/TestFastaData";
-        
-        // When. 
+
+        // When.
         try {
             String[] fastaData = SystemUtil.loadFasta(path);
             String fastaTitle = fastaData[0];
@@ -48,27 +48,27 @@ class SystemUtilTest {
     void loadFasta_wrongPath_throwError() {
         // Given.
         String path = "data/FASTA_does_not_exists.txt";
-        
+
         // When.
-        
+
         // Then.
         try {
             String[] fastaData = SystemUtil.loadFasta(path);
             fail("This code should never be executed.");
         } catch (FileNotFoundException fnfe) {
             assertEquals("java.io.FileNotFoundException: File did not load correctly.", fnfe.toString());
-        } catch  (Exception e) {
+        } catch (Exception e) {
             fail("Any other exceptions are not expected.");
         }
     }
-    
+
     @Test
     @DisplayName("Loading Alternate Amino File")
     void loadAlternateAmino() {
         // Given.
         String path = "data/test/TestAlternateAminosData";
 
-        // When. 
+        // When.
         try {
             ArrayList<Amino> aminoList = SystemUtil.loadAlternateAminos(path);
 
@@ -77,10 +77,8 @@ class SystemUtilTest {
             assertEquals(aminoList.get(0).getData(), "ADF");
             assertEquals(aminoList.get(1).getLocation(), 23);
             assertEquals(aminoList.get(1).getData(), "PLK");
-            assertEquals(aminoList.get(2).getLocation(), 2012
-            );
+            assertEquals(aminoList.get(2).getLocation(), 2012);
             assertEquals(aminoList.get(2).getData(), "CFP");
-
 
         } catch (Exception e) {
             fail("There should not be any exception.");
@@ -94,20 +92,19 @@ class SystemUtilTest {
 
         String path = "data/test/TestCodonFrequencyData";
 
-        // When. 
+        // When.
         try {
             HashMap<String, Integer> codonFrequencies = SystemUtil.loadCodonFrequencies(path);
-            
+
             // Then.
             assertEquals(100000, codonFrequencies.get("ABC"));
             assertEquals(200000, codonFrequencies.get("XYZ"));
-
 
         } catch (Exception e) {
             fail("There should not be any exception.");
         }
     }
-    
+
     @Test
     @DisplayName("Loading Degenerate Codon File")
     void loadDegenerateCodon() {
@@ -115,7 +112,7 @@ class SystemUtilTest {
 
         String path = "data/test/TestDegenerateCodonData";
 
-        // When. 
+        // When.
         try {
             HashMap<String, String[][]> degenerateCodons = SystemUtil.loadDegenerateCodons(path);
 
@@ -131,7 +128,7 @@ class SystemUtilTest {
             assertEquals("WXY", degenerateCodons.get("11111111111111111111")[0][4]);
             assertEquals("AAA", degenerateCodons.get("11111111111111111111")[0][5]);
             assertEquals("1.000", degenerateCodons.get("11111111111111111111")[1][0]);
-            
+
         } catch (Exception e) {
             fail("There should not be any exception.");
         }

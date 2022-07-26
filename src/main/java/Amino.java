@@ -1,8 +1,10 @@
+package main.java;
+
 public class Amino {
     private Integer location;
     private String data;
-    
-    public Amino (Integer location, String data) {
+
+    public Amino(Integer location, String data) {
         this.location = location;
         this.data = data;
     }
@@ -14,8 +16,8 @@ public class Amino {
     public String getData() {
         return data;
     }
-    
-    //TODO
+
+    // TODO
     public static String toDNA() {
         return null;
     }

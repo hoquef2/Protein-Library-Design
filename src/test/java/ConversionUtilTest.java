@@ -11,8 +11,8 @@ public class ConversionUtilTest {
     @Test
     @DisplayName("Converting DNA into protein sequence")
     void convertDnaSequenceToProtein() {
-        //Given.
-        String[] dnaSequence = {"ATT", "ATC", "ATA",
+        // Given.
+        String[] dnaSequence = { "ATT", "ATC", "ATA",
                 "CTT", "CTC", "CTA", "CTG", "TTA", "TTG",
                 "GTT", "GTC", "GTA", "GTG",
                 "TTT", "TTC",
@@ -31,27 +31,27 @@ public class ConversionUtilTest {
                 "GAA", "GAG",
                 "GAT", "GAC",
                 "AAA", "AAG",
-                "CGT", "CGC", "CGA", "CGG", "AGA", "AGG"};
+                "CGT", "CGC", "CGA", "CGG", "AGA", "AGG" };
 
-        //When.
+        // When.
         String actualConversion = ConversionUtil.dnaToProteinSequence(dnaSequence);
         String expectedConversion = "IIILLLLLLVVVVFFMCCAAAAGGGGPPPPTTTTSSSSSSYYWQQNNHHEEDDKKRRRRRR";
 
-        //Then.
+        // Then.
         assertEquals(expectedConversion, actualConversion);
     }
 
     @Test
     @DisplayName("Converting protein sequence into oligo sequence")
     void convertProteinSequenceToDna() {
-        //Given.
+        // Given.
         String path = "data/real/HumanCodonFrequenciesData";
         HashMap<String, Integer> codonFrequencies = SystemUtil.loadCodonFrequencies(path);
         String proteinSequence1 = "";
         String proteinSequence2 = "AAAAAAAA";
         String proteinSequence3 = "ACDEFGHIKLMNPQRSTVWY";
 
-        //When.
+        // When.
         String[] dnaSequence1 = ConversionUtil.proteinSequenceToDna(proteinSequence1, codonFrequencies);
         String backConversion1 = ConversionUtil.dnaToProteinSequence(dnaSequence1);
         String[] dnaSequence2 = ConversionUtil.proteinSequenceToDna(proteinSequence2, codonFrequencies);
@@ -59,7 +59,7 @@ public class ConversionUtilTest {
         String[] dnaSequence3 = ConversionUtil.proteinSequenceToDna(proteinSequence3, codonFrequencies);
         String backConversion3 = ConversionUtil.dnaToProteinSequence(dnaSequence3);
 
-        //Then.
+        // Then.
         assertEquals(proteinSequence1, backConversion1);
         assertEquals(proteinSequence2, backConversion2);
         assertEquals(proteinSequence3, backConversion3);
@@ -69,19 +69,19 @@ public class ConversionUtilTest {
     @Test
     @DisplayName("Converting protein sequence into Max and Min binary temperature oligo sequence w/o degenerate codons")
     void convertProteinSequenceToBinaryTemperatureDna() {
-        //Given.
+        // Given.
         String proteinSequence = "ACDEFGHIKLMNPQRSTVWY";
-        HashMap<Integer, String> degenerateCodons= new HashMap<Integer, String>();
+        HashMap<Integer, String> degenerateCodons = new HashMap<Integer, String>();
         String modeMax = "Max";
         String modeMin = "Min";
 
-        //When.
+        // When.
         String minBinarySequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, modeMin);
         String expectedMinSequence = "111011101101001111101001001101001001111101111011011101011001";
         String maxBinarySequence = ConversionUtil.proteinSequenceToBinary(proteinSequence, degenerateCodons, modeMax);
         String expectedMaxSequence = "110010100100000110100000000000001000110100010010010100011000";
 
-        //Then.
+        // Then.
         assertEquals(expectedMinSequence, minBinarySequence);
         assertEquals(expectedMaxSequence, maxBinarySequence);
     }
