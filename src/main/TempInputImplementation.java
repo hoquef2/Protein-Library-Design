@@ -1,5 +1,3 @@
-package main.java;
-
 public class TempInputImplementation implements GuiValues {
     public int getMinTemp() {
         return 40;

@@ -1,5 +1,3 @@
-package main.java;
-
 public class Amino {
     private Integer location;
     private String data;

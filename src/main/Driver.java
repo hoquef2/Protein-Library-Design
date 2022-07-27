@@ -1,5 +1,3 @@
-package main.java;
-
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +5,8 @@ import java.util.HashMap;
 public class Driver {
 
     public static void main(String[] args) {
+
+        System.out.println(ConversionUtil.altAminoToBinary("ACDEFG"));
 
         TempInputImplementation tempInput = new TempInputImplementation();
         Integer minTemp = tempInput.getMinTemp();

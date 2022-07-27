@@ -1,5 +1,3 @@
-package main.java;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -266,4 +264,39 @@ public class ConversionUtil {
         String tempSequence = tempSequenceBuilder.toString();
         return tempSequence;
     }
+
+    //converts a list of alternate aminos to a binary number.
+    public HashMap<Integer, String[]> altAminoToDecodons(String proteinSequence, ArrayList<Amino> alternateAminoList) {
+        return null;
+    }
+
+    //converts an alternateAmino to binary reprisentation.
+    public static String altAminoToBinary(String aminoList) {
+        //binary representation stored as an Integer[]
+        Integer binaryAminoNum = 0;
+
+        //goes through all 20 aminos
+        for (int currAminoIndex = 0; currAminoIndex < AminoData.NUM_AMINOS; currAminoIndex++) {
+            //goes through every amino in the alternate amino list
+            for (int currAltAminoIndex = 0; currAltAminoIndex < aminoList.length(); currAltAminoIndex++) {
+
+                //checks if the .Amino in the alternate amino list is equivalent to the current amino in the amino list
+                if (aminoList.charAt(currAltAminoIndex) == AminoData.aminoList.charAt(currAminoIndex)) {
+                    binaryAminoNum += (int) Math.pow(2, currAminoIndex);
+                }
+            }
+
+
+        }
+        String binaryAminoString = "";
+
+        Integer numFiller = 20 - Integer.toBinaryString(binaryAminoNum).length();
+        for (int j = 0; j < numFiller; j++) {
+            binaryAminoString += "0";
+        }
+        binaryAminoString += Integer.toBinaryString(binaryAminoNum);
+
+        return binaryAminoString;
+    }
 }
+
