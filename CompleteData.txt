@@ -1,10 +1,10 @@
-Min Temperature: 50
-Max Temperature100
-Min Length: 20
-Max Length:70
-Cost per Base:0.17
-Cost per Degenerate Base:0.25
-Organism Name: Human
-Alternate Amino filePath: 
-FastaFilePath: 
+Min Temperature: 50
+Max Temperature100
+Min Length: 20
+Max Length:70
+Cost per Base:0.17
+Cost per Degenerate Base:0.25
+Organism Name: Human
+Alternate Amino filePath: 
+FastaFilePath: 
 Results on their way #STANDBY
