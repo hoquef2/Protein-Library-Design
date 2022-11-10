@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
+import java.util.HashMap;
 
 public class CuttingAlgorithmUtil {
 
@@ -39,7 +40,7 @@ public class CuttingAlgorithmUtil {
     }
 
     /*
-     * 2D integer array that stores the length an overlap would have to be given
+     * 2D integer array that stores the length an overlap would have to be if given
      * all desired melting temperatures and starting location.
      */
     // TODO make sure that min/max mode compatibility is correctly implemented
@@ -55,14 +56,14 @@ public class CuttingAlgorithmUtil {
         // starting location
         Integer[][] lengthOverlapArray = new Integer[TempSequence.length()][maxTemp - minTemp];
 
-        Integer numTimesCalcUsed = 0;
+        int numTimesCalcUsed = 0;
 
         // goes through the entire lengthOverlapArray, populating it
         for (int tempIndex = 0; tempIndex < maxTemp - minTemp; tempIndex++) {
             // System.out.println("Finding overlaps for temp: " + (minTemp + tempIndex));
 
             // minimum and maximum allowable overlap lengths
-            final Integer MIN_OVERLAP_LEN = 12;
+            final int MIN_OVERLAP_LEN = 12;
             final Integer MAX_OVERLAP_LEN = maxLen;
 
             // the target temperature
@@ -70,9 +71,9 @@ public class CuttingAlgorithmUtil {
             // the calculated temperature
             Integer calculatedTemp = null;
             for (int DNAindex = 0; DNAindex < TempSequence.length(); DNAindex++) {
-                Boolean Continue = true;
-                Integer currOverlapLen = 0;
-                Integer numCG = 0;
+                boolean Continue = true;
+                int currOverlapLen = 0;
+                int numCG = 0;
                 Float CGpercentage;
 
                 // calculates the length the hard way when there is no previous location length
@@ -174,6 +175,8 @@ public class CuttingAlgorithmUtil {
 
     }
 
+
+    //Note: This function is never used. It prints out the data for the overlap calculator for debugging purposes
     public static void printLengthCalculator(Integer[][] lengthCalculatorValue, Integer minTemp, Integer maxTemp) {
         System.out.print("Curr DNA index:  ");
         for (int currDnaIndex = 0; currDnaIndex < lengthCalculatorValue.length; currDnaIndex++) {
@@ -210,23 +213,25 @@ public class CuttingAlgorithmUtil {
 
     // function that performs the dynamically calculated cost optimisation
     // hozimiwatsit.
-    public static String costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, Integer[][] minLenData,
+    public static String costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
             Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
             Float costOfDegenerateBase) {
 
         final Integer lenRange = maxLen - minLen;
-        final Integer tempRange = maxTemp - minTemp;
+        final Integer TEMP_RANGE = maxTemp - minTemp;
+
+        //NUM_NUKES = the number of DNA nucleotides, as the DNA sequence is given in terms of codons, not nucleotides
         final Integer NUM_NUKES = DNAsequence.length * 3;
         // keaps track of minimum cost for each position
 
         // costArray[a][b] keeps track of the cost at position a, temperature b
-        Float[][] costArray = new Float[NUM_NUKES][tempRange];
+        Float[][] costArray = new Float[NUM_NUKES][TEMP_RANGE];
         // lenArray[a][b] keeps track of the length of the most recent oligo at position
         // a, temperature b
-        Integer[][] lenArray = new Integer[NUM_NUKES][tempRange];
-        // overlapArray[a][b]i keeps track of the overlap of the most recent oligo at
+        Integer[][] lenArray = new Integer[NUM_NUKES][TEMP_RANGE];
+        // overlapArray[a][b] keeps track of the overlap of the most recent oligo at
         // position a, temperature b
-        Integer[][] overlapArray = new Integer[NUM_NUKES][tempRange];
+        Integer[][] overlapArray = new Integer[NUM_NUKES][TEMP_RANGE];
 
         for (Float[] tempIndex : costArray) {
             // all entries in costArray are initialized to positive infinity
@@ -234,15 +239,16 @@ public class CuttingAlgorithmUtil {
 
         }
 
-        for (int tempIndex = 0; tempIndex < tempRange; tempIndex++) {
+        for (int tempIndex = 0; tempIndex < TEMP_RANGE; tempIndex++) {
             // the first element of each temperature row are re-initialized to 0
             costArray[0][tempIndex] = 0F;
 
-            // the costs of all the lengths able to be reached by an oligo starting at 0 are
+            // the costs of all the lengths able to be reached by an oligo with position 0 for a given temperature are
             // calculated
             for (int currLen = minLen; currLen < maxLen; currLen++) {
 
-                Float cost = oligoCost(costOfBase, costOfDegenerateBase, altAminoList, 0, currLen);
+                //the oligoCost function is called for a given oligo
+                Float cost = oligoCost(costOfBase, decodonHash, 0, currLen);
                 costArray[currLen][tempIndex] = cost;
 
                 // since costArray value is changed, the corresponding lenArray and overlapArray
@@ -252,7 +258,7 @@ public class CuttingAlgorithmUtil {
                 overlapArray[currLen][tempIndex] = 0;
             }
 
-            // goes through each reachable index (index that is not at +infinity) and
+            // goes through each reachable index (index that is not at positive infinity) and
             // calculates the next oligo cost
             // if the current oligo ended at the given position
             for (int currDnaIndex = 1; currDnaIndex < NUM_NUKES; currDnaIndex++) {
@@ -303,8 +309,8 @@ public class CuttingAlgorithmUtil {
 
                             // makes sure to keep al indexes in bounds
                             if (endIndex < NUM_NUKES) {
-                                float currOligoCost = prevOligoCost + oligoCost(costOfBase, costOfDegenerateBase,
-                                        altAminoList, startIndex, endIndex);
+                                float currOligoCost = prevOligoCost + oligoCost(costOfBase,
+                                        decodonHash, startIndex, endIndex);
 
                                 if (currOligoCost < costArray[endIndex][tempIndex]) {
                                     costArray[endIndex][tempIndex] = currOligoCost;
@@ -326,7 +332,7 @@ public class CuttingAlgorithmUtil {
         int cheapestTempIndex = -1;
 
         // loop to find the temperatureIndex with the cheapest total cost
-        for (int currTempIndex = 0; currTempIndex < tempRange; currTempIndex++) {
+        for (int currTempIndex = 0; currTempIndex < TEMP_RANGE; currTempIndex++) {
             float currCost = costArray[NUM_NUKES - 1][currTempIndex];
 
             // in the case that this is the first temperature index or in the case that the
@@ -340,8 +346,9 @@ public class CuttingAlgorithmUtil {
         // " + (cheapestTempIndex + minTemp));
 
         // because of a lack of foresight, the DNA sequence is stored in a String array
-        // instead of as a single string,
-        // this makes the sequence unwieldy, so here, it is converted into a string.
+        // instead of as a single string.
+        // this makes the sequence more unwieldy than if it was stored as a single string.
+        // here, it is converted into a string.
         // This is quite hacky, but it is
         // simply easier, for the time being, than refactoring all the code.
         StringBuffer dnaSequenceStringBuffer = new StringBuffer(NUM_NUKES);
@@ -356,6 +363,7 @@ public class CuttingAlgorithmUtil {
 
         // System.out.println("The DNA sequence is: " + dnaString);
 
+        //used to lable the current oligo in the multifasta output
         int oligoNum = 1;
 
         // the ending position of the current oligo
@@ -365,18 +373,83 @@ public class CuttingAlgorithmUtil {
         // currOlgioStart = endingPosition - length
         int currOligoStart = currOligoEnd - lenArray[currOligoEnd][cheapestTempIndex];
 
-        multiFastaOutput.append(">Oligo " + oligoNum + "\n" + dnaString.substring(currOligoStart, currOligoEnd) + "\n");
-        oligoNum++;
 
-        while (currOligoStart != 0) {
-            int currOligoOverlap = overlapArray[currOligoEnd][cheapestTempIndex];
-            currOligoEnd = currOligoStart + currOligoOverlap;
-            currOligoStart = currOligoEnd - lenArray[currOligoEnd][cheapestTempIndex];
+        boolean cont = true;
+        while (cont) {
 
-            multiFastaOutput
-                    .append(">Oligo " + oligoNum + "\n" + dnaString.substring(currOligoStart, currOligoEnd) + "\n");
+            //printing out the next oligo
 
-            oligoNum++;
+
+
+            //calculates the number of copies of the oligo we need to account for decodons
+
+
+            ArrayList<StringBuilder> oligoDecodonVarients = new ArrayList<StringBuilder>();
+            StringBuilder firstVarient = new StringBuilder();
+            oligoDecodonVarients.add(firstVarient);
+
+            for(int currBase = currOligoStart; currBase < currOligoEnd; currBase++){
+
+                //If there is no multidecodon at this position, add the nucleotide to the chain normally
+                if(decodonHash.get(currBase) == null) {
+                    for(StringBuilder oligoVarient : oligoDecodonVarients) {
+                        oligoVarient.append(dnaString.substring(currBase, currBase + 1));
+                    }
+                }
+                else {
+                    //otherwise calculate the number of variants needed
+                    int duplicationFactor = 0;
+                    int numVariants = oligoDecodonVarients.size();
+                    for(String codon : decodonHash.get(currBase)) {
+                        duplicationFactor++;
+                    }
+
+                    //make a temporary copy of the oligo variant list
+                    ArrayList<StringBuilder> duplicateVariantList = new ArrayList<StringBuilder>();
+                    for(StringBuilder varient: oligoDecodonVarients) {
+                        StringBuilder tempVarient = new StringBuilder(varient);
+                        duplicateVariantList.add(tempVarient);
+                    }
+
+                    //duplicate the variant list by the number of variants needed
+                    for(int currDuplicate = 0; currDuplicate < duplicationFactor; currDuplicate++) {
+                        //adding the current codon onto the current
+                        for(int currVariant = 0; currVariant < numVariants; currVariant++) {
+
+                            //current codon
+                            String currCodon = decodonHash.get(currBase)[currDuplicate];
+
+                            StringBuilder currentVariant = new StringBuilder(oligoDecodonVarients.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
+                            oligoDecodonVarients.set(currDuplicate * numVariants + currVariant, currentVariant);
+                        }
+
+
+                        //duplication occuring
+                        if(currDuplicate != duplicationFactor - 1) {
+                            for(StringBuilder variant : duplicateVariantList) {
+                                oligoDecodonVarients.add(variant);
+                            }
+                        }
+                    }
+                    currBase+=2;
+                }
+            }
+            for(StringBuilder oligoVarient : oligoDecodonVarients) {
+                multiFastaOutput
+                        .append(">Oligo " + oligoNum + "\n" + oligoVarient + "\n");
+                oligoNum++;
+            }
+
+            //if this is the last oligo, go to the start of the while loop and exit
+            if(currOligoStart == 0) {
+                cont = false;
+            }
+            //otherwise, iterate to the next oligo
+            else{
+                int currOligoOverlap = overlapArray[currOligoEnd][cheapestTempIndex];
+                currOligoEnd = currOligoStart + currOligoOverlap;
+                currOligoStart = currOligoEnd - lenArray[currOligoEnd][cheapestTempIndex];
+            }
         }
 
         String outputString = multiFastaOutput.toString();
@@ -430,27 +503,25 @@ public class CuttingAlgorithmUtil {
                 }
             }
             System.out.println();
+
         }
     }
 
     // calculates the cost of a given oligo
-    public static Float oligoCost(Float costOfBase, Float costOfDegenerateBase, ArrayList<Amino> altAminoList,
+    public static Float oligoCost(Float costOfBase, HashMap<Integer,String[]> decodonHash,
             Integer startPos, Integer endPos) {
         // TODO make cost algorithm more efficient
         Integer numBases = (endPos - startPos);
-        Integer numDegenerateBases = 0;
+        Integer codonCostMultiplier = 1;
 
-        // calculating the number of degenerate codons
-        for (int currCodon = 0; currCodon < altAminoList.size(); currCodon++) {
-            if (startPos <= altAminoList.get(currCodon).getLocation()
-                    && altAminoList.get(currCodon).getLocation() <= endPos) {
-                // TODO confirm if true
-                // The minus 1 is there since one of the degenerate codons are accounted for, I
-                // thik
-                numDegenerateBases += altAminoList.get(currCodon).getData().length() - 1;
+        // if a position has n degenerate codons: multiply the cost by (n + 1)
+        for(int currPos = startPos; currPos < endPos; currPos++) {
+            if(decodonHash.get(currPos) != null) {
+                codonCostMultiplier *= decodonHash.get(currPos).length + 1;
             }
         }
-        Float cost = (numBases * costOfBase) + (numDegenerateBases * costOfDegenerateBase);
+
+        Float cost = (numBases * costOfBase) * codonCostMultiplier;
 
         return cost;
     }

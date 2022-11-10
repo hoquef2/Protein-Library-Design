@@ -266,8 +266,26 @@ public class ConversionUtil {
     }
 
     //converts a list of alternate aminos to a binary number.
-    public HashMap<Integer, String[]> altAminoToDecodons(String proteinSequence, ArrayList<Amino> alternateAminoList) {
-        return null;
+    public static HashMap<Integer, String[]> altAminoToDecodons(String proteinSequence, ArrayList<Amino> alternateAminoList, HashMap<String, String[][]> degenCodonHash) {
+
+        HashMap<Integer, String[]> decodonsHash = new HashMap<>();
+
+        Integer numAminos = alternateAminoList.size();
+
+
+        for (int currAmino = 0; currAmino < numAminos; currAmino++) {
+            int currAminoLocation = alternateAminoList.get(currAmino).getLocation() * 3;
+            String currAltAminos = alternateAminoList.get(currAmino).getData();
+            //altAminos and originalAminoAtPosition
+            String currAllAminos = currAltAminos.concat(String.valueOf(proteinSequence.charAt(currAminoLocation)));
+            String aminosBinaryNumber = altAminoToBinary(currAltAminos);
+            String[] currDecodons = degenCodonHash.get(aminosBinaryNumber)[0];
+
+            decodonsHash.put(currAminoLocation, currDecodons);
+
+        }
+
+        return decodonsHash;
     }
 
     //converts an alternateAmino to binary reprisentation.
@@ -285,8 +303,6 @@ public class ConversionUtil {
                     binaryAminoNum += (int) Math.pow(2, currAminoIndex);
                 }
             }
-
-
         }
         String binaryAminoString = "";
 
