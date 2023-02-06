@@ -1,11 +1,6 @@
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Driver {
 
@@ -20,7 +15,7 @@ public class Driver {
                 //return false;
             //}
         }
-        //return true;
+        return true;
 
     }
 
@@ -88,9 +83,34 @@ public class Driver {
 
 
 
-        String output = CuttingAlgorithmUtil.costCalculator(dnaSequence, altAminoList, convertedDecodonList, minLengthCalculatorOutput,
+        DNASegment[] output = CuttingAlgorithmUtil.costCalculator(dnaSequence, altAminoList, convertedDecodonList, minLengthCalculatorOutput,
                 maxLengthCalculatorOutput, minLen, maxLen, minTemp, maxTemp, costOfCodon, costOfDegenerateCodon);
         System.out.println(output);
+
+        int numSegments = output.length;
+        for(int currSegmentIndex = 0; currSegmentIndex < numSegments; currSegmentIndex++) {
+            DNASegment currSegmentData = output[currSegmentIndex];
+            //the number of versions at the current Segment
+            int numVersions = currSegmentData.getNumVersions();
+            for(int currVersion = 0; currVersion < numVersions; currVersion++) {
+                for(int curSpace = 0; curSpace < currSegmentData.getStartIndex(); curSpace++) {
+                    System.out.print(" ");
+                }
+                System.out.println(currSegmentData.getSequence(currVersion));
+            }
+        }
+
+        //going through each segment, checking to see if they generate the correct protein segment
+        for(int currSegmentIndex = 0; currSegmentIndex < numSegments; currSegmentIndex++) {
+            DNASegment currSegment = output[currSegmentIndex];
+
+            //go through every third position
+            //  if (n, n + 3) are all A, T, C or G:     // do all decodons have degenerate bases?
+            //      go to the lookup table to get the cooresponding amino acid
+            //      if cooresponding amino acid != fastaAminoArray[n/3]
+            //          print(false at dna segment # x at position y)
+
+        }
 
     }
 }

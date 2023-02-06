@@ -213,9 +213,14 @@ public class CuttingAlgorithmUtil {
 
     // function that performs the dynamically calculated cost optimisation
     // hozimiwatsit.
-    public static String costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
+    public static DNASegment[] costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
             Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
             Float costOfDegenerateBase) {
+
+        //Output for the array: an arrayList of DNASegments
+        //Each DNASegment contains all the oligonucleotides at that position
+        //as well as the starting index
+        ArrayList<DNASegment> DNASegmentsArrayListData = new ArrayList<DNASegment>();
 
         final Integer lenRange = maxLen - minLen;
         final Integer TEMP_RANGE = maxTemp - minTemp;
@@ -357,9 +362,9 @@ public class CuttingAlgorithmUtil {
         }
         String dnaString = dnaSequenceStringBuffer.toString();
 
-        // a stringbuffer to temporatily store what will become the output with an
+        // a stringbuffer to temporarily store what will become the output with an
         // initial capacity of the number of bases
-        StringBuffer multiFastaOutput = new StringBuffer(NUM_NUKES);
+
 
         // System.out.println("The DNA sequence is: " + dnaString);
 
@@ -384,29 +389,29 @@ public class CuttingAlgorithmUtil {
             //calculates the number of copies of the oligo we need to account for decodons
 
 
-            ArrayList<StringBuilder> oligoDecodonVarients = new ArrayList<StringBuilder>();
+            ArrayList<StringBuilder> oligoStringBuilderArray = new ArrayList<StringBuilder>();
             StringBuilder firstVarient = new StringBuilder();
-            oligoDecodonVarients.add(firstVarient);
+            oligoStringBuilderArray.add(firstVarient);
 
             for(int currBase = currOligoStart; currBase < currOligoEnd; currBase++){
 
                 //If there is no multidecodon at this position, add the nucleotide to the chain normally
                 if(decodonHash.get(currBase) == null) {
-                    for(StringBuilder oligoVarient : oligoDecodonVarients) {
+                    for(StringBuilder oligoVarient : oligoStringBuilderArray) {
                         oligoVarient.append(dnaString.substring(currBase, currBase + 1));
                     }
                 }
                 else {
                     //otherwise calculate the number of variants needed
                     int duplicationFactor = 0;
-                    int numVariants = oligoDecodonVarients.size();
+                    int numVariants = oligoStringBuilderArray.size();
                     for(String codon : decodonHash.get(currBase)) {
                         duplicationFactor++;
                     }
 
                     //make a temporary copy of the oligo variant list
                     ArrayList<StringBuilder> duplicateVariantList = new ArrayList<StringBuilder>();
-                    for(StringBuilder varient: oligoDecodonVarients) {
+                    for(StringBuilder varient: oligoStringBuilderArray) {
                         StringBuilder tempVarient = new StringBuilder(varient);
                         duplicateVariantList.add(tempVarient);
                     }
@@ -419,26 +424,38 @@ public class CuttingAlgorithmUtil {
                             //current codon
                             String currCodon = decodonHash.get(currBase)[currDuplicate];
 
-                            StringBuilder currentVariant = new StringBuilder(oligoDecodonVarients.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
-                            oligoDecodonVarients.set(currDuplicate * numVariants + currVariant, currentVariant);
+                            StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
+                            oligoStringBuilderArray.set(currDuplicate * numVariants + currVariant, currentVariant);
                         }
 
 
                         //duplication occuring
                         if(currDuplicate != duplicationFactor - 1) {
                             for(StringBuilder variant : duplicateVariantList) {
-                                oligoDecodonVarients.add(variant);
+                                oligoStringBuilderArray.add(variant);
                             }
                         }
                     }
                     currBase+=2;
                 }
             }
-            for(StringBuilder oligoVarient : oligoDecodonVarients) {
-                multiFastaOutput
-                        .append(">Oligo " + oligoNum + "\n" + oligoVarient + "\n");
-                oligoNum++;
+
+            //I am now implementing a new version of output. One that involves objects for easier handling.
+
+            //variable is self explanatory. Perhaps, it can be defined higher up in the code
+            int numOligoVariants = oligoStringBuilderArray.size();
+            //constructing a string array with the same number of elements as oligoStringBuilderArray for output purposes
+            String[] oligoStringArray = new String[numOligoVariants];
+
+            //for loop that converts the StringBuilder Array into a String Array
+            for(int currVariant = 0; currVariant < numOligoVariants; currVariant++) {
+                String currVariantString = oligoStringBuilderArray.get(currVariant).toString();
+                oligoStringArray[currVariant] = currVariantString;
             }
+
+            //adding the oligoStringArray to the DNASegmentsArrayListData ArrayList
+            DNASegment currSegment = new DNASegment(currOligoStart, numOligoVariants, oligoStringArray);
+            DNASegmentsArrayListData.add(currSegment);
 
             //if this is the last oligo, go to the start of the while loop and exit
             if(currOligoStart == 0) {
@@ -452,9 +469,16 @@ public class CuttingAlgorithmUtil {
             }
         }
 
-        String outputString = multiFastaOutput.toString();
 
-        return outputString;
+        int numSegments = DNASegmentsArrayListData.size();
+        DNASegment[] DNASegmentOutput = new DNASegment[numSegments];
+
+        //The Segments in DNASegmentsArrayListData have been stored in reverse order, because it was
+        //simply easier to do so at the time. The output, however, should be in standard order.
+        for(int currSegment = 0; currSegment < numSegments; currSegment++) {
+            DNASegmentOutput[numSegments - 1 - currSegment] = DNASegmentsArrayListData.get(currSegment);
+        }
+        return DNASegmentOutput;
     }
 
     private static void printResultsArray(Float[][] costArray, Integer[][] lenArray, Integer[][] overlapArray,
