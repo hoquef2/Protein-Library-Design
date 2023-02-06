@@ -108,7 +108,8 @@ public class Driver {
             //  if (n, n + 3) are all A, T, C or G:     // do all decodons have degenerate bases?
             //      go to the lookup table to get the cooresponding amino acid
             //      if cooresponding amino acid != fastaAminoArray[n/3]
-            //          print(false at dna segment # x at position y)
+            //          print(false at
+            //          dna segment # x at position y)
 
         }
 

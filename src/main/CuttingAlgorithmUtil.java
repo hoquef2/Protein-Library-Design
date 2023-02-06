@@ -14,13 +14,11 @@ public class CuttingAlgorithmUtil {
         if (Mode.equals("Min")) {
             // temp equation for lengths less than 18
             if (length < 18) {
-                temp = (int) Math
-                        .round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
+                temp = (int) Math.round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
             }
             // temp equation for lengths greater than or equal to 18
             else {
-                temp = (int) Math
-                        .round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
+                temp = (int) Math.round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
             }
         } else if (Mode.equals("Max")) {
             // temp equation for lengths less than 18
@@ -45,7 +43,7 @@ public class CuttingAlgorithmUtil {
      */
     // TODO make sure that min/max mode compatibility is correctly implemented
     public static Integer[][] overlapCalculator(String TempSequence, Integer minTemp, Integer maxTemp, Integer maxLen,
-                                                String Mode) {
+            String Mode) {
 
         // Mode must be either 'Min' or 'Max'
         if (!(Mode.equals("Min") || Mode.equals("Max"))) {
@@ -214,8 +212,8 @@ public class CuttingAlgorithmUtil {
     // function that performs the dynamically calculated cost optimisation
     // hozimiwatsit.
     public static DNASegment[] costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
-                                              Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
-                                              Float costOfDegenerateBase) {
+            Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
+            Float costOfDegenerateBase) {
 
         //Output for the array: an arrayList of DNASegments
         //Each DNASegment contains all the oligonucleotides at that position
@@ -393,26 +391,27 @@ public class CuttingAlgorithmUtil {
             StringBuilder firstVarient = new StringBuilder();
             oligoStringBuilderArray.add(firstVarient);
 
+            int currBase = currOligoStart;
+            while(currBase  < currOligoEnd){
 
-            int currOligoPos = currOligoStart;
-            boolean lastCodon = false;
-            while(lastCodon == false) {
-                //If there is no multidecodon at this position or in adjacent positions that are related to the same codon, add the nucleotide to the chain normally
-                int currOffset = currOligoPos % 3; // the current offset from the start of a codon
+                //If there is no multidecodon at this position or in agacent positions that are related to the same codon, add the nucleotide to the chain normally
+                int currOffset = currBase % 3; // the current offset from the start of a codon
+                System.out.println("CurrBase, CurrOligoEnd" + currBase +", " + currOligoEnd);
 
-                if(decodonHash.get(currOligoPos - currOffset) == null) {
+                if(decodonHash.get(currBase - currOffset) == null) {
                     for(StringBuilder oligoVarient : oligoStringBuilderArray) {
-                        oligoVarient.append(dnaString.substring(currOligoPos, currOligoPos + 1));
-                        if(currOligoPos >= currOligoEnd) {
-                            lastCodon = true;
+                        String currCodon = dnaString.substring(currBase, currBase + 3);
+                        if(currOligoEnd < currBase + 3) {
+                            currCodon = currCodon.substring(0, currOligoEnd - currBase);
                         }
+                        oligoVarient.append(currCodon);
                     }
                 }
                 else {
                     //otherwise calculate the number of variants needed
                     int duplicationFactor = 0;
                     int numVariants = oligoStringBuilderArray.size();
-                    for(String codon : decodonHash.get(currOligoPos - currOffset)) {
+                    for(String codon : decodonHash.get(currBase - currOffset)) {
                         duplicationFactor++;
                     }
 
@@ -429,13 +428,17 @@ public class CuttingAlgorithmUtil {
                         for(int currVariant = 0; currVariant < numVariants; currVariant++) {
 
                             //current codon
-                            String currCodon = decodonHash.get(currOligoPos - currOffset)[currDuplicate];
+                            String currCodon = decodonHash.get(currBase - currOffset)[currDuplicate];
 
-                            //in the case that the codon is partially outside the bounds of the current segment, then we need to
+                             //in the case that the codon is partially outside the bounds of the current segment, then we need to
                             //truncate the codon to only append the part within bounds
+                            if(currOligoEnd < currBase + 3) {
+                                currCodon = currCodon.substring(0, currOligoEnd - currBase);
+                            }
                             //currCodon = currCodon.substring(currOffset, 2);
 
                             StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
+                            //adding the varient to the oligoStringBuilderArray
                             oligoStringBuilderArray.set(currDuplicate * numVariants + currVariant, currentVariant);
                         }
 
@@ -447,13 +450,14 @@ public class CuttingAlgorithmUtil {
                             }
                         }
                     }
-                    currOligoPos+=2;
                 }
+                currBase += 3 - currOffset;
+
             }
 
             //I am now implementing a new version of output. One that involves objects for easier handling.
 
-            //variable is self explanatory. Perhaps, it can be defined higher up in the code
+            //variable is self-explanatory. Perhaps, it can be defined higher up in the code
             int numOligoVariants = oligoStringBuilderArray.size();
             //constructing a string array with the same number of elements as oligoStringBuilderArray for output purposes
             String[] oligoStringArray = new String[numOligoVariants];
@@ -493,7 +497,7 @@ public class CuttingAlgorithmUtil {
     }
 
     private static void printResultsArray(Float[][] costArray, Integer[][] lenArray, Integer[][] overlapArray,
-                                          Integer minTemp, Integer maxTemp) {
+            Integer minTemp, Integer maxTemp) {
         System.out.print("Curr DNA index:  ");
         for (int currDnaIndex = 0; currDnaIndex < costArray.length; currDnaIndex++) {
             Formatter formatter = new Formatter();
@@ -544,7 +548,7 @@ public class CuttingAlgorithmUtil {
 
     // calculates the cost of a given oligo
     public static Float oligoCost(Float costOfBase, HashMap<Integer,String[]> decodonHash,
-                                  Integer startPos, Integer endPos) {
+            Integer startPos, Integer endPos) {
         // TODO make cost algorithm more efficient
         Integer numBases = (endPos - startPos);
         Integer codonCostMultiplier = 1;
