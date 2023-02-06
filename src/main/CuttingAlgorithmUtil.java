@@ -395,8 +395,12 @@ public class CuttingAlgorithmUtil {
 
             for(int currBase = currOligoStart; currBase < currOligoEnd; currBase++){
 
-                //If there is no multidecodon at this position, add the nucleotide to the chain normally
-                if(decodonHash.get(currBase) == null) {
+
+
+                //If there is no multidecodon at this position or in agacent positions that are related to the same codon, add the nucleotide to the chain normally
+                int currOffset = currBase % 3; // the current offset from the start of a codon
+
+                if(decodonHash.get(currBase - currOffset) == null) {
                     for(StringBuilder oligoVarient : oligoStringBuilderArray) {
                         oligoVarient.append(dnaString.substring(currBase, currBase + 1));
                     }
@@ -405,7 +409,7 @@ public class CuttingAlgorithmUtil {
                     //otherwise calculate the number of variants needed
                     int duplicationFactor = 0;
                     int numVariants = oligoStringBuilderArray.size();
-                    for(String codon : decodonHash.get(currBase)) {
+                    for(String codon : decodonHash.get(currBase - currOffset)) {
                         duplicationFactor++;
                     }
 
@@ -422,7 +426,11 @@ public class CuttingAlgorithmUtil {
                         for(int currVariant = 0; currVariant < numVariants; currVariant++) {
 
                             //current codon
-                            String currCodon = decodonHash.get(currBase)[currDuplicate];
+                            String currCodon = decodonHash.get(currBase - currOffset)[currDuplicate];
+
+                            //in the case that the codon is partially outside the bounds of the current segment, then we need to
+                            //truncate the codon to only append the part within bounds
+                            //currCodon = currCodon.substring(currOffset, 2);
 
                             StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
                             oligoStringBuilderArray.set(currDuplicate * numVariants + currVariant, currentVariant);
