@@ -45,7 +45,7 @@ public class CuttingAlgorithmUtil {
      */
     // TODO make sure that min/max mode compatibility is correctly implemented
     public static Integer[][] overlapCalculator(String TempSequence, Integer minTemp, Integer maxTemp, Integer maxLen,
-            String Mode) {
+                                                String Mode) {
 
         // Mode must be either 'Min' or 'Max'
         if (!(Mode.equals("Min") || Mode.equals("Max"))) {
@@ -214,8 +214,8 @@ public class CuttingAlgorithmUtil {
     // function that performs the dynamically calculated cost optimisation
     // hozimiwatsit.
     public static DNASegment[] costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
-            Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
-            Float costOfDegenerateBase) {
+                                              Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
+                                              Float costOfDegenerateBase) {
 
         //Output for the array: an arrayList of DNASegments
         //Each DNASegment contains all the oligonucleotides at that position
@@ -393,23 +393,26 @@ public class CuttingAlgorithmUtil {
             StringBuilder firstVarient = new StringBuilder();
             oligoStringBuilderArray.add(firstVarient);
 
-            for(int currBase = currOligoStart; currBase < currOligoEnd; currBase++){
 
+            int currOligoPos = currOligoStart;
+            boolean lastCodon = false;
+            while(lastCodon == false) {
+                //If there is no multidecodon at this position or in adjacent positions that are related to the same codon, add the nucleotide to the chain normally
+                int currOffset = currOligoPos % 3; // the current offset from the start of a codon
 
-
-                //If there is no multidecodon at this position or in agacent positions that are related to the same codon, add the nucleotide to the chain normally
-                int currOffset = currBase % 3; // the current offset from the start of a codon
-
-                if(decodonHash.get(currBase - currOffset) == null) {
+                if(decodonHash.get(currOligoPos - currOffset) == null) {
                     for(StringBuilder oligoVarient : oligoStringBuilderArray) {
-                        oligoVarient.append(dnaString.substring(currBase, currBase + 1));
+                        oligoVarient.append(dnaString.substring(currOligoPos, currOligoPos + 1));
+                        if(currOligoPos >= currOligoEnd) {
+                            lastCodon = true;
+                        }
                     }
                 }
                 else {
                     //otherwise calculate the number of variants needed
                     int duplicationFactor = 0;
                     int numVariants = oligoStringBuilderArray.size();
-                    for(String codon : decodonHash.get(currBase - currOffset)) {
+                    for(String codon : decodonHash.get(currOligoPos - currOffset)) {
                         duplicationFactor++;
                     }
 
@@ -426,7 +429,7 @@ public class CuttingAlgorithmUtil {
                         for(int currVariant = 0; currVariant < numVariants; currVariant++) {
 
                             //current codon
-                            String currCodon = decodonHash.get(currBase - currOffset)[currDuplicate];
+                            String currCodon = decodonHash.get(currOligoPos - currOffset)[currDuplicate];
 
                             //in the case that the codon is partially outside the bounds of the current segment, then we need to
                             //truncate the codon to only append the part within bounds
@@ -444,7 +447,7 @@ public class CuttingAlgorithmUtil {
                             }
                         }
                     }
-                    currBase+=2;
+                    currOligoPos+=2;
                 }
             }
 
@@ -490,7 +493,7 @@ public class CuttingAlgorithmUtil {
     }
 
     private static void printResultsArray(Float[][] costArray, Integer[][] lenArray, Integer[][] overlapArray,
-            Integer minTemp, Integer maxTemp) {
+                                          Integer minTemp, Integer maxTemp) {
         System.out.print("Curr DNA index:  ");
         for (int currDnaIndex = 0; currDnaIndex < costArray.length; currDnaIndex++) {
             Formatter formatter = new Formatter();
@@ -541,7 +544,7 @@ public class CuttingAlgorithmUtil {
 
     // calculates the cost of a given oligo
     public static Float oligoCost(Float costOfBase, HashMap<Integer,String[]> decodonHash,
-            Integer startPos, Integer endPos) {
+                                  Integer startPos, Integer endPos) {
         // TODO make cost algorithm more efficient
         Integer numBases = (endPos - startPos);
         Integer codonCostMultiplier = 1;
