@@ -4,9 +4,94 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class SystemUtil {
+
+
+    /*
+        converts a Fasta File containing 1 or more amino acids at a given position into
+        a Fasta file containing 1 amino acid at a given position and a file containing
+        key, value pairs specifying positions with multiple amino acids and associated amino acids.
+    */
+    public static Object[] convertToNewFormat(String path) throws FileNotFoundException {
+        String[] pathsOfNewFiles =  {};
+        System.out.println("Program Ran russcesdjkf");
+
+        StringBuffer rawData = new StringBuffer();
+        try (FileReader fastaFileReader = new FileReader(path)) {
+            int i;
+            while ((i = fastaFileReader.read()) != -1) {
+                char currentChar = (char) i;
+                rawData.append(currentChar);
+            }
+        } catch (IOException e) {
+            String errorMessage = "File did not load correctly.";
+            System.err.println(errorMessage);
+            throw new FileNotFoundException(errorMessage);
+        }
+
+
+        String data = String.valueOf(rawData);
+        String[] result = data.split("\\r?\\n", 2);
+
+
+        String title = result[0];
+        String originalFastaContent = result[1];
+        originalFastaContent = originalFastaContent.replaceAll("\\s", "");
+
+        StringBuffer outputFasta = new StringBuffer();
+        HashMap<Integer,String> multiAminoHash = new HashMap<Integer, String>();
+        Boolean insideMultiAminoPosition = false;
+        int currAminoPosition = 0;
+        for(int i = 0; i < originalFastaContent.length(); i++) {
+            char currChar = originalFastaContent.charAt(i);
+
+            if (insideMultiAminoPosition == false) {
+                currAminoPosition++;
+                if (currChar == '[') {
+                    insideMultiAminoPosition = true;
+                    outputFasta.append(originalFastaContent.charAt(i + 1));
+                    multiAminoHash.put(currAminoPosition, "");
+                } else {
+                    outputFasta.append(currChar);
+                }
+            } else {
+                if (currChar == ']') {
+                    insideMultiAminoPosition = false;
+                } else {
+                    multiAminoHash.put(currAminoPosition, multiAminoHash.get(currAminoPosition) + Character.toString(currChar));
+                }
+            }
+        }
+
+        ArrayList<Amino> altAminoList = new ArrayList<Amino>();
+        for (Map.Entry<Integer, String> mapElement : multiAminoHash.entrySet()) {
+            Integer location = mapElement.getKey();
+            String aminoData = (mapElement.getValue());
+            Amino thisAmino = new Amino(location, aminoData);
+            altAminoList.add(thisAmino);
+        }
+
+        for (Amino amino: altAminoList) {
+            System.out.println(amino.getLocation() + " " + amino.getData());
+        }
+
+
+        System.out.println(originalFastaContent);
+        System.out.println(multiAminoHash);
+        System.out.println(outputFasta);
+
+
+
+        return new Object[] { outputFasta.toString(), altAminoList};
+
+    }
+
+
+
+
     public static String[] loadFasta(String path) throws FileNotFoundException {
         String title = null;
         String content = null;

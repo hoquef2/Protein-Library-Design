@@ -11,29 +11,15 @@ public class CuttingAlgorithmUtil {
 
         int temp;
 
-        if (Mode.equals("Min")) {
-            // temp equation for lengths less than 18
-            if (length < 18) {
-                temp = (int) Math.round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
-            }
-            // temp equation for lengths greater than or equal to 18
-            else {
-                temp = (int) Math.round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
-            }
-        } else if (Mode.equals("Max")) {
-            // temp equation for lengths less than 18
-            if (length < 18) {
-                temp = (int) Math
-                        .round((2 * length * (CGpercentage + 1)) + (16.6 * Math.log10(NaConcentration / 0.05)));
-            }
-            // temp equation for lengths greater than or equal to 18
-            else {
-                temp = (int) Math
-                        .round(((-820) / length) + 100.5 + (41 * CGpercentage) + (16.6 * Math.log10(NaConcentration)));
-            }
-        } else {
-            throw new IllegalArgumentException("Mode must either be \"Min\" or \"Max\"");
+        // temp equation for lengths less than 18
+        if (length < 18) {
+            temp = (int) Math.round((2 * length * CGpercentage + 4*length*(1-CGpercentage)+ (16.6 * Math.log10(NaConcentration / 0.05))));
         }
+        // temp equation for lengths greater than or equal to 18
+        else {
+            temp = (int) Math.round(((-820) / length) + 100.5 + (41 * CGpercentage)+ (16.6 * Math.log10(NaConcentration / 0.05)));
+        }
+
         return temp;
     }
 
@@ -76,8 +62,7 @@ public class CuttingAlgorithmUtil {
 
                 // calculates the length the hard way when there is no previous location length
                 // data to use as an estimate
-                // TODO make algorithm more efficient by using previously calculated length as
-                // best estimate for next pos
+                // TODO make algorithm more efficient by using previously calculated length best estimate for next pos
 
                 while (Continue) {
 
@@ -310,7 +295,7 @@ public class CuttingAlgorithmUtil {
                             Integer startIndex = currDnaIndex - currOverlap;
                             Integer endIndex = currDnaIndex - currOverlap + currLen;
 
-                            // makes sure to keep al indexes in bounds
+                            // makes sure to keep all indexes in bounds
                             if (endIndex < NUM_NUKES) {
                                 float currOligoCost = prevOligoCost + oligoCost(costOfBase,
                                         decodonHash, startIndex, endIndex);
@@ -331,6 +316,7 @@ public class CuttingAlgorithmUtil {
 
         // the cheapest total cost
         float cheapestCost = Float.POSITIVE_INFINITY;
+        int cheapestTemp = 0;
         // the temperatureIndex with the cheapest total cost
         int cheapestTempIndex = -1;
 
@@ -343,7 +329,12 @@ public class CuttingAlgorithmUtil {
             if (cheapestTempIndex == -1 || currCost < cheapestCost) {
                 cheapestTempIndex = currTempIndex;
                 cheapestCost = currCost;
+                cheapestTemp = minTemp + currTempIndex;
             }
+        }
+        for(int i = 0; i < 27; i++) {
+            System.out.println("CurrentCost: " + cheapestCost);
+            System.out.println("CurrentTemp " + cheapestTemp);
         }
         // System.out.println("The cheapest cost is: " + cheapestCost + " at temperature
         // " + (cheapestTempIndex + minTemp));
@@ -437,7 +428,9 @@ public class CuttingAlgorithmUtil {
                             }
                             //currCodon = currCodon.substring(currOffset, 2);
 
-                            StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + "\u001B[31m" + currCodon + "\u001B[0m");
+                            StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant)  + currCodon);
+                            //StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + currCodon);
+
                             //adding the varient to the oligoStringBuilderArray
                             oligoStringBuilderArray.set(currDuplicate * numVariants + currVariant, currentVariant);
                         }
@@ -493,6 +486,7 @@ public class CuttingAlgorithmUtil {
         for(int currSegment = 0; currSegment < numSegments; currSegment++) {
             DNASegmentOutput[numSegments - 1 - currSegment] = DNASegmentsArrayListData.get(currSegment);
         }
+
         return DNASegmentOutput;
     }
 

@@ -1,22 +1,22 @@
 public class TempInputImplementation implements GuiValues {
     public int getMinTemp() {
-        return 40;
+        return 60;
     }
 
     public int getMaxTemp() {
-        return 100;
+        return 80;
     }
 
     public int getMinLen() {
-        return 15;
+        return 40;
     }
 
     public int getMaxLen() {
-        return 35;
+        return 90;
     }
 
     public Float getCostPerBase() {
-        return 0.1F;
+        return 0.38F;
     }
 
     public Float getCostPerDegenerateBase() {
