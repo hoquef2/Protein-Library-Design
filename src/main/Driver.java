@@ -51,8 +51,8 @@ public class Driver {
 
 
 
-        String pathOfOriginalInputFile = "C:/Users/Yehuda/Documents/Github_Projects/OligoNukes/data/test_FaASTA_input/bclxl2.fasta";
-        String outputFileName = "C:/Users/Yehuda/Documents/Github_Projects/OligoNukes/data/test_FASTA_output/bclxl2-Output.fasta";
+        String pathOfOriginalInputFile = "C:/Users/Yehuda/Documents/Github_Projects/OligoNukes/data/test_FaASTA_input/bclxl.fasta";
+        String outputFileName = "C:/Users/Yehuda/Documents/Github_Projects/OligoNukes/data/test_FASTA_output/bclxl-Output.fasta";
 
         Object[] parsedData = {};
         try {

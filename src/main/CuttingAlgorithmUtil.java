@@ -369,7 +369,10 @@ public class CuttingAlgorithmUtil {
 
 
         boolean cont = true;
+
+
         while (cont) {
+            System.out.println("Start: " + currOligoStart);
 
             //printing out the next oligo
 
@@ -385,17 +388,17 @@ public class CuttingAlgorithmUtil {
             int currBase = currOligoStart;
             while(currBase  < currOligoEnd){
 
-                //If there is no multidecodon at this position or in agacent positions that are related to the same codon, add the nucleotide to the chain normally
                 int currOffset = currBase % 3; // the current offset from the start of a codon
-                System.out.println("CurrBase, CurrOligoEnd" + currBase +", " + currOligoEnd);
+                //System.out.println("CurrBase, CurrOligoEnd" + currBase +", " + currOligoEnd);
 
+                //If there is no multidecodon at this position or in adjacent positions that are related to the same codon, add the nucleotide to the chain normally
                 if(decodonHash.get(currBase - currOffset) == null) {
-                    for(StringBuilder oligoVarient : oligoStringBuilderArray) {
+                    for(StringBuilder oligoVariant : oligoStringBuilderArray) {
                         String currCodon = dnaString.substring(currBase, currBase + 3);
                         if(currOligoEnd < currBase + 3) {
                             currCodon = currCodon.substring(0, currOligoEnd - currBase);
                         }
-                        oligoVarient.append(currCodon);
+                        oligoVariant.append(currCodon);
                     }
                 }
                 else {
@@ -487,7 +490,37 @@ public class CuttingAlgorithmUtil {
             DNASegmentOutput[numSegments - 1 - currSegment] = DNASegmentsArrayListData.get(currSegment);
         }
 
+        //checkResult(DNASegmentOutput);
+
         return DNASegmentOutput;
+    }
+
+    //Goes through all the DNA oligos of a calcualted solution, and checks to see if they code for the proper protein
+    private static boolean checkResult(DNASegment[] dnaSegmentArray) {
+        for(int segmentIndex = 0; segmentIndex < dnaSegmentArray.length; segmentIndex++) {
+            DNASegment currSegment = dnaSegmentArray[segmentIndex];
+            int numVersions = currSegment.getNumVersions();
+            //Cuts the DNA segments into codons, and then converts the codon array into a protein
+            for(int versionIndex = 0; versionIndex < numVersions; versionIndex++) {
+                String currVersion = currSegment.getSequence(versionIndex);
+                int startingIndex = currSegment.getStartIndex();
+                int firstCodonStartingIndex = (startingIndex + (3 - (startingIndex % 3)));
+
+                System.out.println(currSegment.getStartIndex());
+                System.out.println(firstCodonStartingIndex);
+                System.out.println(currVersion);
+
+
+                int currIndex = firstCodonStartingIndex;
+                for(int i = firstCodonStartingIndex; i < firstCodonStartingIndex + currSegment.getLength() - 6; i += 3) {
+                    System.out.print(currVersion.substring(i, i + 3) + " ");
+
+                }
+
+
+            }
+        }
+        return false;
     }
 
     private static void printResultsArray(Float[][] costArray, Integer[][] lenArray, Integer[][] overlapArray,
