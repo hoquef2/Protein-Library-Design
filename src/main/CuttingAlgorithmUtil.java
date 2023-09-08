@@ -196,6 +196,54 @@ public class CuttingAlgorithmUtil {
 
     // function that performs the dynamically calculated cost optimisation
     // hozimiwatsit.
+
+    //Turns The DNA and Hash map into into a a String Array Data Type.
+    //Sample: ATCGTCATCAGT
+    //        ATG   ATC
+    //              AAC
+
+    // 0 = A, 1 = T, 2 = C, 3 = G
+    public static String[] DNAcleaner(String DNA, HashMap<Integer,String[]> decodonHash){
+
+        //6 is at least 1 above the maximum number of decodons.
+        char[][] data = new char[6][DNA.length()];
+
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < DNA.length(); j++) {
+                data[i][j] = ' ';
+            }
+        }
+        for(int j = 0; j < DNA.length(); j++) {
+            data[5][j] = '1';
+        }
+
+        for(int i = 0; i < DNA.length(); i++) {
+            data[0][i] = DNA.charAt(i);
+        }
+
+        for(int posInDna = 0; posInDna < DNA.length(); posInDna+=3) {
+            String[] codonArray = decodonHash.get(posInDna);
+            if(codonArray != null){
+                char numCodons = Character.forDigit(codonArray.length, 6);
+                for(int currCodon = 0; currCodon < codonArray.length; currCodon++) {
+                    for(int posInCodon = 0; posInCodon < 3; posInCodon++) {
+                        data[currCodon][posInDna + posInCodon] = codonArray[currCodon].charAt(posInCodon);
+                        data[5][posInDna + posInCodon] = numCodons;
+                    }
+                }
+            }
+        }
+
+        String[] output = new String[6];
+        for(int i = 0; i < 6; i++) {
+            output[i] = String.valueOf(data[i]);
+        }
+
+        return output;
+    }
+
+
+
     public static DNASegment[] costCalculator(String[] DNAsequence, ArrayList<Amino> altAminoList, HashMap<Integer,String[]> decodonHash, Integer[][] minLenData,
             Integer[][] maxLenData, Integer minLen, Integer maxLen, Integer minTemp, Integer maxTemp, Float costOfBase,
             Float costOfDegenerateBase) {
@@ -351,14 +399,10 @@ public class CuttingAlgorithmUtil {
         }
         String dnaString = dnaSequenceStringBuffer.toString();
 
-        // a stringbuffer to temporarily store what will become the output with an
-        // initial capacity of the number of bases
-
-
-        // System.out.println("The DNA sequence is: " + dnaString);
-
-        //used to lable the current oligo in the multifasta output
-        int oligoNum = 1;
+        String[] cleanDna = DNAcleaner(dnaString, decodonHash);
+        for(int i = 0; i < cleanDna.length; i++) {
+            System.out.println(cleanDna[i]);
+        }
 
         // the ending position of the current oligo
         int currOligoEnd = NUM_NUKES - 1;
@@ -369,21 +413,71 @@ public class CuttingAlgorithmUtil {
 
 
         boolean cont = true;
-
-
         while (cont) {
-            System.out.println("Start: " + currOligoStart);
+            System.out.println("Start: " + currOligoStart + " End: " + currOligoEnd);
 
-            //printing out the next oligo
+            int numVariants = 1;
+            boolean alreadyCountedCodon = false; //keeps track if the current codon has already been taken into account in the total variant list
+            for (int currBaseIndex = currOligoStart; currBaseIndex < currOligoEnd; currBaseIndex++) {
+                //if a new codon has been reached
+                if (currBaseIndex % 3 == 0) {
+                    alreadyCountedCodon = false;
+                }
+                //if the current codon has not been taken into account
+                if (alreadyCountedCodon == false) {
+                    int numDecodons = Character.getNumericValue(cleanDna[5].charAt(currBaseIndex));
+                    numVariants = numVariants * numDecodons;
+                    alreadyCountedCodon = true;
+                }
+            }
+            System.out.println("Num Variants: " + numVariants);
+
+            char[][] oligoVariants = new char[numVariants][currOligoEnd - currOligoStart];
+            for (int currBaseIndex = currOligoStart; currBaseIndex < currOligoEnd; currBaseIndex++) {
+                int currOligoVariantIndex = currBaseIndex - currOligoStart;
+                int numDecodons = Character.getNumericValue(cleanDna[5].charAt(currBaseIndex));
+                if (numDecodons == 1) {
+                    char currBase = cleanDna[0].charAt(currBaseIndex);
+                    for (int currVariant = 0; currVariant < numVariants; currVariant++) {
+                        oligoVariants[currVariant][currOligoVariantIndex] = currBase;
+                    }
+                } else {
+                    int currDecodon = 0;
+                    for (int currVariant = 0; currVariant < numVariants; currVariant++) {
+                        char currBase = cleanDna[currDecodon].charAt(currBaseIndex);
+                        oligoVariants[currVariant][currOligoVariantIndex] = currBase;
+                        if(currDecodon < numDecodons - 1) {
+                            currDecodon++;
+                        }
+                        else {
+                            currDecodon = 0;
+                        }
+
+                    }
+                }
+            }
+            for (int currVariant = 0; currVariant < numVariants; currVariant++) {
+                System.out.println(String.valueOf(oligoVariants[currVariant]));
+            }
+
+            //if reached the last oligo, break
+            if (currOligoStart == 0) {
+                cont = false;
+            }
+            //otherwise, iterate to the next oligo
+            else {
+                int currOligoOverlap = overlapArray[currOligoEnd][cheapestTempIndex];
+                currOligoEnd = currOligoStart + currOligoOverlap;
+                currOligoStart = currOligoEnd - lenArray[currOligoEnd][cheapestTempIndex];
+
+            }
 
 
-
-            //calculates the number of copies of the oligo we need to account for decodons
-
-
+            /*
             ArrayList<StringBuilder> oligoStringBuilderArray = new ArrayList<StringBuilder>();
-            StringBuilder firstVarient = new StringBuilder();
-            oligoStringBuilderArray.add(firstVarient);
+
+            StringBuilder firstVariant = new StringBuilder();
+            oligoStringBuilderArray.add(firstVariant);
 
             int currBase = currOligoStart;
             while(currBase  < currOligoEnd){
@@ -393,8 +487,11 @@ public class CuttingAlgorithmUtil {
 
                 //If there is no multidecodon at this position or in adjacent positions that are related to the same codon, add the nucleotide to the chain normally
                 if(decodonHash.get(currBase - currOffset) == null) {
+
+
                     for(StringBuilder oligoVariant : oligoStringBuilderArray) {
-                        String currCodon = dnaString.substring(currBase, currBase + 3);
+                        String currCodon = dnaString.substring(currBase + currOffset, currBase + 3);
+                        //if the codon needs to be cut off at the back
                         if(currOligoEnd < currBase + 3) {
                             currCodon = currCodon.substring(0, currOligoEnd - currBase);
                         }
@@ -424,12 +521,14 @@ public class CuttingAlgorithmUtil {
                             //current codon
                             String currCodon = decodonHash.get(currBase - currOffset)[currDuplicate];
 
-                             //in the case that the codon is partially outside the bounds of the current segment, then we need to
-                            //truncate the codon to only append the part within bounds
+                            // in the case that the codon is partially outside the bounds of the current segment, then we need to
+                            // truncate the codon to only append the part within bounds
                             if(currOligoEnd < currBase + 3) {
                                 currCodon = currCodon.substring(0, currOligoEnd - currBase);
+                            } //otherwise, if the offset is greater than 0, then that means that the codon falls partially outside of bounds in the front
+                            else if(currOffset > 0) {
+                                currCodon = currCodon.substring(currOffset, 2);
                             }
-                            //currCodon = currCodon.substring(currOffset, 2);
 
                             StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant)  + currCodon);
                             //StringBuilder currentVariant = new StringBuilder(oligoStringBuilderArray.get(currDuplicate * numVariants + currVariant) + currCodon);
@@ -493,6 +592,10 @@ public class CuttingAlgorithmUtil {
         //checkResult(DNASegmentOutput);
 
         return DNASegmentOutput;
+        */
+
+        }
+        return null;
     }
 
     //Goes through all the DNA oligos of a calcualted solution, and checks to see if they code for the proper protein
