@@ -134,6 +134,15 @@ public class Driver {
             }
         }
 
+        for(int currSegmentIndex = 0; currSegmentIndex < numSegments; currSegmentIndex++) {
+            DNASegment currSegmentData = output[currSegmentIndex];
+            //the number of versions at the current Segment
+            int numVersions = currSegmentData.getNumVersions();
+            for(int currVersion = 0; currVersion < numVersions; currVersion++) {
+                System.out.println(currSegmentData.getSequence(currVersion));
+            }
+        }
+
 
 
         //going through each segment, checking to see if they generate the correct protein segment

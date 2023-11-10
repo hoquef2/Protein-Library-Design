@@ -498,6 +498,8 @@ public class CuttingAlgorithmUtil {
         for (int currSegment = 0; currSegment < numSegments; currSegment++) {
             DNASegmentOutput[numSegments - 1 - currSegment] = DNASegmentsArrayListData.get(currSegment);
         }
+
+
         return DNASegmentOutput;
     }
 
