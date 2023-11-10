@@ -274,14 +274,14 @@ public class ConversionUtil {
 
 
         for (int currAmino = 0; currAmino < numAminos; currAmino++) {
-            int currAminoLocation = alternateAminoList.get(currAmino).getLocation() * 3;
+            int currAminoLocation = alternateAminoList.get(currAmino).getLocation();
             String currAltAminos = alternateAminoList.get(currAmino).getData();
             //altAminos and originalAminoAtPosition
             String currAllAminos = currAltAminos.concat(String.valueOf(proteinSequence.charAt(currAminoLocation)));
             String aminosBinaryNumber = altAminoToBinary(currAltAminos);
             String[] currDecodons = degenCodonHash.get(aminosBinaryNumber)[0];
 
-            decodonsHash.put(currAminoLocation, currDecodons);
+            decodonsHash.put(currAminoLocation * 3, currDecodons);
 
         }
 
